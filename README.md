@@ -1,126 +1,216 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# My Podcast API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+My Podcast API is a learning project built with NestJS and TypeScript. It demonstrates how to organize an HTTP API using modules, controllers, services, dependency injection, DTOs, pipes, guards, unit tests, and end-to-end tests.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+The application provides an in-memory podcast episode API. Episodes can be created and retrieved, but the data is reset whenever the application restarts because no database or persistent storage is currently configured.
 
-## Description
+## What was implemented
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Created a NestJS application using the ESM/TypeScript project structure.
+- Added a root application module and an `AppController` health-style greeting endpoint.
+- Created an `EpisodesModule` with:
+  - `EpisodesController` for HTTP routing.
+  - `EpisodesService` for episode operations.
+  - `CreateEpisodeDto` for request validation.
+  - `Episode` as the episode entity shape.
+- Implemented episode listing, featured-episode filtering, lookup by ID, and creation.
+- Added UUID generation for new episode IDs.
+- Added sorting by episode name in ascending or descending order.
+- Added API key protection for all episode routes.
+- Added custom validation and transformation for request data:
+  - String, boolean, date, and optional field validation.
+  - Positive-number validation for the `limit` query parameter.
+  - Integer parsing for `limit`.
+- Added unit test coverage for the controller and service setup.
+- Added an end-to-end test for the root endpoint.
+- Configured Vitest for unit and e2e test execution.
+- Configured NestJS Observe instrumentation for telemetry, tracing, metrics, and error reporting.
+- Added an initial modular configuration structure for `ConfigModule` and `ConfigService`.
+
+## Technology stack
+
+- Node.js
+- NestJS 12
+- TypeScript
+- Express
+- class-validator and class-transformer
+- Vitest and Supertest
+- @nestjs/observe
+- oxlint and Prettier
+
+## API routes
+
+Every route under `/episodes` requires the `X-API-KEY` header.
+
+| Method | Route | Description |
+| --- | --- | --- |
+| `GET` | `/` | Returns `Hello World!` |
+| `GET` | `/episodes` | Returns all episodes; supports `sort=asc` or `sort=desc` |
+| `GET` | `/episodes/featured` | Returns episodes marked as featured |
+| `GET` | `/episodes/:id` | Returns one episode by ID, or `404` when not found |
+| `POST` | `/episodes` | Creates a new episode |
+
+### Example: create an episode
+
+```bash
+curl -X POST http://localhost:3000/episodes \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: my-secret-api-key" \
+  -d "{\"name\":\"My First Episode\",\"featured\":true,\"publishedAt\":\"2026-11-25T12:00:00.000Z\"}"
+```
+
+### Example: list episodes
+
+```bash
+curl "http://localhost:3000/episodes?sort=asc&limit=100" \
+  -H "X-API-KEY: my-secret-api-key"
+```
+
+The `sort` query parameter defaults to `desc`. The `limit` query parameter defaults to `100`; it must be a positive integer.
+
+## API key
+
+For this learning project, the episode API key is currently hard-coded:
+
+```text
+X-API-KEY: my-secret-api-key
+```
+
+Requests without the correct header are rejected by `ApiKeyGuardGuard`. This is suitable for practice only; a production application should load API keys or authentication credentials from environment variables and use a real authentication strategy.
 
 ## Project setup
 
-```bash
-$ npm install
-```
+Requirements:
 
-## Compile and run the project
+- Node.js
+- npm
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+Install dependencies:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
+## Running the project
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Development mode:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-This project is already instrumented. To connect it, run this and approve the code it prints at [observe.nestjs.com/link](https://observe.nestjs.com/link) - signing up for free if you have no account:
+Watch mode:
 
 ```bash
-$ npx @nestjs/observe link
+npm run start:dev
 ```
 
-It writes the app key and secret into `.env` and makes every `nest start` script (`start`, `start:dev`, `start:debug`) load it. In production, set `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment instead.
+Debug mode:
 
-Or do it by hand: create an application and an API key at [observe.nestjs.com](https://observe.nestjs.com), and set the pair as `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment the app runs in.
+```bash
+npm run start:debug
+```
 
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
+Production build and run:
 
-## Resources
+```bash
+npm run build
+npm run start:prod
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+The server listens on `PORT`, or port `3000` when `PORT` is not set.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Testing
 
-## Support
+Run unit tests:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npm test
+```
 
-## Stay in touch
+Run unit tests in watch mode:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+npm run test:watch
+```
+
+Run end-to-end tests:
+
+```bash
+npm run test:e2e
+```
+
+Run coverage:
+
+```bash
+npm run test:cov
+```
+
+## Code quality
+
+Format source and test files:
+
+```bash
+npm run format
+```
+
+Run lint checks:
+
+```bash
+npm run lint
+```
+
+## NestJS Observe
+
+The application includes NestJS Observe instrumentation. Telemetry is sent when `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` are configured:
+
+```text
+OBSERVE_APP_KEY=<your-app-key>
+OBSERVE_APP_SECRET=<your-app-secret>
+```
+
+To link the application, run:
+
+```bash
+npx @nestjs/observe link
+```
+
+This opens the Observe linking flow and writes the credentials to `.env`.
+
+## Project structure
+
+```text
+src/
+  app.controller.ts
+  app.module.ts
+  app.service.ts
+  main.ts
+  config/
+    config.module.ts
+    config.service.ts
+  episodes/
+    episodes.controller.ts
+    episodes.module.ts
+    episodes.service.ts
+    dto/
+    entities/
+    guards/
+    pipes/
+  topics/
+    topics.module.ts
+test/
+  app.e2e-spec.ts
+```
+
+## Current limitations
+
+- Episodes are stored only in a JavaScript array, so they do not survive application restarts.
+- The API key is hard-coded.
+- There is no database integration or repository layer.
+- There is no update or delete endpoint.
+- The `limit` value is validated but is not currently used to reduce the returned episode list.
+- The `TopicsModule` is only a basic module scaffold.
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is private and is provided for learning purposes.
