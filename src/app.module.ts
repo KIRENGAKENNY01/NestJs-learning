@@ -4,6 +4,10 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { EpisodesModule } from './episodes/episodes.module.js';
 import { TopicsModule } from './topics/topics.module.js';
+import { UsersModule } from './users/users.module.js';
+import { AuthModule } from './auth/auth.module.js';
+import { ConfigModule } from '@nestjs/config';
+
 
 
 
@@ -19,8 +23,13 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       appSecret: process.env.OBSERVE_APP_SECRET ?? 'YOUR_APP_SECRET',
       serviceId: 'my-podcast-api',
     }),
+    ConfigModule.forRoot({
+      isGlobal:true, 
+    }), 
     EpisodesModule,
     TopicsModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
